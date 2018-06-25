@@ -1,7 +1,6 @@
 package com.rg;
 
 import com.rg.analyser.github.GitHubAnalyser;
-import com.rg.exception.IOConnectionException;
 import com.rg.profile.github.GitHubProfile;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,13 +15,15 @@ import java.util.List;
 public class GitHubAnalyserTest {
 
     private static final String TXT = "repos.txt";
+    private static final String LOGIN = "";
+    private static final String PASSWORD = "";
 
     private GitHubAnalyser analyser;
     private List<URL> urls;
 
     @Before
     public void init() throws URISyntaxException {
-        analyser = new GitHubAnalyser();
+        analyser = new GitHubAnalyser(LOGIN, PASSWORD);
         urls = new ArrayList<>();
 
         URL url = getClass().getClassLoader().getResource(TXT);

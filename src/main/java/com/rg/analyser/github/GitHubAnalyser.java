@@ -1,7 +1,6 @@
 package com.rg.analyser.github;
 
 import com.rg.exception.IOConnectionException;
-import com.rg.profile.Profile;
 import com.rg.profile.github.GitHubProfile;
 import com.rg.analyser.SiteAnalyser;
 import org.kohsuke.github.GitHub;
@@ -22,7 +21,7 @@ public class GitHubAnalyser implements SiteAnalyser{
     }
 
     @Override
-    public Profile analyse(URL url) {       //format: https://github.com/login
+    public GitHubProfile analyse(URL url) {       //format: https://github.com/login
         String path = url.getPath();
         String login = path.substring(1);
         GitHubProfile profile;
