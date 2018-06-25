@@ -1,8 +1,7 @@
 package com.rg;
 
 import com.rg.analyser.SiteAnalyser;
-import com.rg.exception.CrawlerInitializationException;
-import com.rg.exception.IOConnectionException;
+import com.rg.utils.ReaderUtils;
 import com.rg.profile.Profile;
 
 import java.io.*;
@@ -12,10 +11,10 @@ import java.util.concurrent.*;
 
 public class Crawler {
 
+    private static final String CONFIG = "hosts.properties";
+
     private static final String MAX_PARALLEL_REQUESTS_ENV = "crawler.maxParallelRequests";
     private static final String REQUEST_DELAY_MS_ENV = "crawler.requestDelayMs";
-
-    private static final String CONFIG = "hosts.properties";
 
     private int maxParallelRequests = 1;
     private int requestDelayMs = 1000;
@@ -37,35 +36,12 @@ public class Crawler {
 
         threadPool = Executors.newScheduledThreadPool(maxParallelRequests);
 
-        analysers = new HashMap<>();
-
-        try {
-            Properties hostProperties = new Properties();
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG);
-            hostProperties.load(inputStream);
-
-            for (Object key : hostProperties.keySet()){
-                String host = (String) key;
-                String className = hostProperties.getProperty(host);
-
-                Class clazz = Class.forName(className);
-                SiteAnalyser analyser = (SiteAnalyser) clazz.newInstance();
-                analysers.put(host, analyser);
-            }
-        }
-        catch (IOException e) {
-            throw new IOConnectionException(e);
-        } catch (IllegalAccessException e) {
-            throw new CrawlerInitializationException(e);
-        } catch (InstantiationException e) {
-            throw new CrawlerInitializationException(e);
-        } catch (ClassNotFoundException e) {
-            throw new CrawlerInitializationException(e);
-        }
+        Properties properties = ReaderUtils.readProperties(CONFIG);
+        analysers = ReaderUtils.loadFromProperties(properties);
     }
 
     public void crawl(File file){
-        List<URL> urls = readFile(file);
+        List<URL> urls = ReaderUtils.readURLFromFile(file);
         crawl(urls);
     }
 
@@ -82,24 +58,4 @@ public class Crawler {
 
         threadPool.shutdown();
     }
-
-    public static List<URL> readFile(File file){
-        List<URL> urls = new ArrayList<>();
-        try {
-            FileReader reader = new FileReader(file);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-
-            String url;
-            while ((url = bufferedReader.readLine()) != null){
-                urls.add(new URL(url));
-            }
-
-        } catch (FileNotFoundException e) {
-            throw new IOConnectionException(e);
-        } catch (IOException e) {
-            throw new IOConnectionException(e);
-        }
-        return urls;
-    }
-
 }

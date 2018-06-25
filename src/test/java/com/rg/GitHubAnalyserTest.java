@@ -2,6 +2,7 @@ package com.rg;
 
 import com.rg.analyser.github.GitHubAnalyser;
 import com.rg.profile.github.GitHubProfile;
+import com.rg.utils.ReaderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class GitHubAnalyserTest {
         urls = new ArrayList<>();
 
         URL url = getClass().getClassLoader().getResource(TXT);
-        urls = Crawler.readFile(new File(url.toURI()));
+        urls = ReaderUtils.readURLFromFile(new File(url.toURI()));
     }
 
     @Test
