@@ -3,10 +3,10 @@ package com.rg.analyser.github;
 import com.rg.exception.IOConnectionException;
 import com.rg.profile.github.GitHubProfile;
 import com.rg.analyser.SiteAnalyser;
+import com.rg.utils.ReaderUtils;
 import org.kohsuke.github.GitHub;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
@@ -17,14 +17,13 @@ public class GitHubAnalyser implements SiteAnalyser{
     private GitHub gitHub;
 
     public GitHubAnalyser(){
-        Properties properties = new Properties();
         try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG);
-            properties.load(inputStream);
+            Properties properties = ReaderUtils.readProperties(CONFIG);
             gitHub = GitHub.connectUsingPassword(properties.getProperty("login"), properties.getProperty("password"));
         } catch (IOException e) {
             throw new IOConnectionException(e);
         }
+
     }
 
     public GitHubAnalyser(String login, String password){
