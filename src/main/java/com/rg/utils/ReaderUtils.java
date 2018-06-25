@@ -1,7 +1,7 @@
 package com.rg.utils;
 
 import com.rg.analyser.SiteAnalyser;
-import com.rg.exception.ReadingException;
+import com.rg.exception.LoadingException;
 import com.rg.exception.IOConnectionException;
 
 import java.io.*;
@@ -11,9 +11,8 @@ import java.util.*;
 public class ReaderUtils {
 
     public static Properties readProperties(String name){
-        Properties properties = null;
+        Properties properties = new Properties();
         try {
-            properties = new Properties();
             InputStream inputStream = ReaderUtils.class.getClassLoader().getResourceAsStream(name);
             properties.load(inputStream);
         }
@@ -36,11 +35,11 @@ public class ReaderUtils {
             }
         }
         catch (IllegalAccessException e) {
-            throw new ReadingException(e);
+            throw new LoadingException(e);
         } catch (InstantiationException e) {
-            throw new ReadingException(e);
+            throw new LoadingException(e);
         } catch (ClassNotFoundException e) {
-            throw new ReadingException(e);
+            throw new LoadingException(e);
         }
         return analysers;
     }
