@@ -45,8 +45,8 @@ public class GitHubProfile implements Profile{
                     }
                 }
 
-                if(repository.getSubscribersCount() >= max){  //get popular repository and number of stars
-                    max = repository.getSubscribersCount();
+                if(repository.getWatchers() >= max){  //get popular repository and number of stars
+                    max = repository.getWatchers();
                     popularRepository = repository.getName();
                     starsInPopularRepository = repository.getStargazersCount();
                 }
@@ -94,6 +94,6 @@ public class GitHubProfile implements Profile{
 
     @Override
     public String toString() {
-        return "login: " + login + "\nname: " + name + "\ncompany: " + company + "\nlocation: " + location + "\nlanguage: " + language + "\nstars: " + starsInPopularRepository;
+        return "login: " + login + "\nname: " + name + "\ncompany: " + company + "\nlocation: " + location + "\nlanguage: " + language + "\npopular repo: " + popularRepository + "\nstars: " + starsInPopularRepository;
     }
 }

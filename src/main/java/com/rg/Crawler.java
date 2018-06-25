@@ -1,10 +1,13 @@
 package com.rg;
 
 import com.rg.analyser.SiteAnalyser;
+import com.rg.exception.CrawlerInitializationException;
 import com.rg.exception.IOConnectionException;
 import com.rg.profile.Profile;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
@@ -24,9 +27,7 @@ public class Crawler {
 
     private Properties properties;
 
-    private Map<URL, SiteAnalyser> analysers;
-
-    private List<URL> urls;
+    private Map<String, SiteAnalyser> analysers;
 
     public Crawler(){
         String maxParallelRequestsEnv = System.getenv(MAX_PARALLEL_REQUESTS_ENV);
@@ -59,7 +60,7 @@ public class Crawler {
 
         List<String> hosts = new ArrayList<>();
 
-        String str = "";
+        String str = hostsProperty;
         while (str != null){
             int index = str.indexOf(";");
             if(index == -1){
@@ -72,36 +73,67 @@ public class Crawler {
         }
 
         Pattern classPattern = Pattern.compile(".*\\.class");
-        Pattern argsPattern = Pattern.compile(".*\\.arg \\d");
+        Pattern argsPattern = Pattern.compile(".*\\.arg\\d");
 
         for(String host : hosts){
-            List<String> args = new ArrayList<>();
+            String className = null;
+            Map<Integer, String> args = new TreeMap<>();
 
             for (Object key : properties.keySet()){
                 String keyString = (String) key;
                 if (keyString.contains(host)){
-
+                    if(classPattern.matcher(keyString).matches()){
+                        className = properties.getProperty(keyString);
+                    }
+                    if(argsPattern.matcher(keyString).matches()){
+                        int index = Integer.valueOf(keyString.substring(keyString.length()-1, keyString.length()));
+                        args.put(index, properties.getProperty(keyString));
+                    }
                 }
+            }
+
+            if (className == null){
+                continue;
+            }
+
+            try {
+                Class clazz = Class.forName(className);
+                for(Constructor constructor : clazz.getDeclaredConstructors()){
+                    if(constructor.getParameterCount() == args.size()){
+                        SiteAnalyser analyser = (SiteAnalyser) constructor.newInstance(args.values().toArray());
+                        analysers.put(host, analyser);
+                        break;
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                throw new CrawlerInitializationException(e);
+            } catch (IllegalAccessException e) {
+                throw new CrawlerInitializationException(e);
+            } catch (InstantiationException e) {
+                throw new CrawlerInitializationException(e);
+            } catch (InvocationTargetException e) {
+                throw new CrawlerInitializationException(e);
             }
         }
 
     }
 
     public void crawl(File file){
-        urls = readFile(file);
+        List<URL> urls = readFile(file);
         crawl(urls);
     }
 
-    public void crawl(List<URL> urls){
+    public void crawl(List<URL> urls) {
         for (URL url : urls){
-            threadPool.scheduleWithFixedDelay(()-> {
+            threadPool.schedule(()-> {
 
                 Profile profile = analysers.get(url.getHost()).analyse(url);
 
                 System.out.println(profile);
 
-            }, 0, requestDelayMs, TimeUnit.MILLISECONDS);
+            }, requestDelayMs, TimeUnit.MILLISECONDS);
         }
+        threadPool.shutdown();;
     }
 
     public static List<URL> readFile(File file){
