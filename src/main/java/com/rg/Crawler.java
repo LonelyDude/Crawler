@@ -48,7 +48,7 @@ public class Crawler {
     }
 
     public void crawl(File file){
-        urls = (List<URL>) readFile(file);
+        urls = readFile(file);
         crawl(urls);
     }
 
@@ -71,7 +71,7 @@ public class Crawler {
         }
     }
 
-    private Collection readFile(File file){
+    public static List<URL> readFile(File file){
         List<URL> urls = new ArrayList<>();
         try {
             FileReader reader = new FileReader(file);

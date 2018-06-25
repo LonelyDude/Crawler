@@ -91,4 +91,9 @@ public class GitHubProfile implements Profile{
     public int getStarsInPopularRepository() {
         return starsInPopularRepository;
     }
+
+    @Override
+    public String toString() {
+        return "login: " + login + "\nname: " + name + "\ncompany: " + company + "\nlocation: " + location + "\nlanguage: " + language + "\nstars: " + starsInPopularRepository;
+    }
 }

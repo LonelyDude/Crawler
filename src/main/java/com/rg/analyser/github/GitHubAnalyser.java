@@ -13,16 +13,16 @@ public class GitHubAnalyser implements SiteAnalyser{
 
     private GitHub gitHub;
 
-    public GitHubAnalyser(){
+    public GitHubAnalyser(String login, String password){
         try {
-            gitHub = GitHub.connect();
+            gitHub = GitHub.connectUsingPassword(login, password);
         } catch (IOException e) {
             throw new IOConnectionException(e);
         }
     }
 
     @Override
-    public Profile analyse(URL url) { //        https://github.com/login
+    public Profile analyse(URL url) {       //format: https://github.com/login
         String path = url.getPath();
         String login = path.substring(1);
         GitHubProfile profile;
