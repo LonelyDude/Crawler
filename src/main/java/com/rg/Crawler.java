@@ -37,7 +37,7 @@ public class Crawler {
         threadPool = Executors.newScheduledThreadPool(maxParallelRequests);
 
         Properties properties = ReaderUtils.readProperties(CONFIG);
-        analysers = ReaderUtils.loadFromProperties(properties);
+        analysers = ReaderUtils.loadAnalyserFromProperties(properties);
     }
 
     public void crawl(File file){

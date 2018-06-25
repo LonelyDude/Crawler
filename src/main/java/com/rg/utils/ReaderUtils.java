@@ -22,7 +22,7 @@ public class ReaderUtils {
         return properties;
     }
 
-    public static Map<String, SiteAnalyser> loadFromProperties(Properties hostProperties){
+    public static Map<String, SiteAnalyser> loadAnalyserFromProperties(Properties hostProperties){
         Map<String, SiteAnalyser> analysers = new HashMap<>();
         try {
             for (Object key : hostProperties.keySet()){
