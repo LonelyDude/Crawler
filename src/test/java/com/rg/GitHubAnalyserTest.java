@@ -15,15 +15,13 @@ import java.util.List;
 public class GitHubAnalyserTest {
 
     private static final String TXT = "repos.txt";
-    private static final String LOGIN = "";
-    private static final String PASSWORD = "";
 
     private GitHubAnalyser analyser;
     private List<URL> urls;
 
     @Before
     public void init() throws URISyntaxException {
-        analyser = new GitHubAnalyser(LOGIN, PASSWORD);
+        analyser = new GitHubAnalyser();
         urls = new ArrayList<>();
 
         URL url = getClass().getClassLoader().getResource(TXT);
@@ -33,7 +31,7 @@ public class GitHubAnalyserTest {
     @Test
     public void analyseTest(){
         for (URL url : urls){
-            GitHubProfile profile = (GitHubProfile) analyser.analyse(url);
+            GitHubProfile profile = analyser.analyse(url);
             if(profile == null){
                 Assert.fail();
             }

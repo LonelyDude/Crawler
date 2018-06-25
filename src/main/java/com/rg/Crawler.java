@@ -6,26 +6,21 @@ import com.rg.exception.IOConnectionException;
 import com.rg.profile.Profile;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.regex.Pattern;
 
 public class Crawler {
 
     private static final String MAX_PARALLEL_REQUESTS_ENV = "crawler.maxParallelRequests";
     private static final String REQUEST_DELAY_MS_ENV = "crawler.requestDelayMs";
+
     private static final String CONFIG = "hosts.properties";
-    private static final String HOSTS_PROPERTY = "hosts";
 
     private int maxParallelRequests = 1;
     private int requestDelayMs = 1000;
 
     private final ScheduledExecutorService threadPool;
-
-    private Properties properties;
 
     private Map<String, SiteAnalyser> analysers;
 
@@ -45,77 +40,28 @@ public class Crawler {
         analysers = new HashMap<>();
 
         try {
-            properties = new Properties();
+            Properties hostProperties = new Properties();
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG);
-            properties.load(inputStream);
-        } catch (IOException e) {
-            throw new IOConnectionException(e);
-        }
+            hostProperties.load(inputStream);
 
-        loadAnalysers(properties);
-    }
+            for (Object key : hostProperties.keySet()){
+                String host = (String) key;
+                String className = hostProperties.getProperty(host);
 
-    private void loadAnalysers(Properties properties){
-        String hostsProperty = properties.getProperty(HOSTS_PROPERTY);
-
-        List<String> hosts = new ArrayList<>();
-
-        String str = hostsProperty;
-        while (str != null){
-            int index = str.indexOf(";");
-            if(index == -1){
-                hosts.add(str);
-                break;
-            }
-
-            hosts.add(str.substring(0, index));
-            str = str.substring(index + 1, str.length());
-        }
-
-        Pattern classPattern = Pattern.compile(".*\\.class");
-        Pattern argsPattern = Pattern.compile(".*\\.arg\\d");
-
-        for(String host : hosts){
-            String className = null;
-            Map<Integer, String> args = new TreeMap<>();
-
-            for (Object key : properties.keySet()){
-                String keyString = (String) key;
-                if (keyString.contains(host)){
-                    if(classPattern.matcher(keyString).matches()){
-                        className = properties.getProperty(keyString);
-                    }
-                    if(argsPattern.matcher(keyString).matches()){
-                        int index = Integer.valueOf(keyString.substring(keyString.length()-1, keyString.length()));
-                        args.put(index, properties.getProperty(keyString));
-                    }
-                }
-            }
-
-            if (className == null){
-                continue;
-            }
-
-            try {
                 Class clazz = Class.forName(className);
-                for(Constructor constructor : clazz.getDeclaredConstructors()){
-                    if(constructor.getParameterCount() == args.size()){
-                        SiteAnalyser analyser = (SiteAnalyser) constructor.newInstance(args.values().toArray());
-                        analysers.put(host, analyser);
-                        break;
-                    }
-                }
-            } catch (ClassNotFoundException e) {
-                throw new CrawlerInitializationException(e);
-            } catch (IllegalAccessException e) {
-                throw new CrawlerInitializationException(e);
-            } catch (InstantiationException e) {
-                throw new CrawlerInitializationException(e);
-            } catch (InvocationTargetException e) {
-                throw new CrawlerInitializationException(e);
+                SiteAnalyser analyser = (SiteAnalyser) clazz.newInstance();
+                analysers.put(host, analyser);
             }
         }
-
+        catch (IOException e) {
+            throw new IOConnectionException(e);
+        } catch (IllegalAccessException e) {
+            throw new CrawlerInitializationException(e);
+        } catch (InstantiationException e) {
+            throw new CrawlerInitializationException(e);
+        } catch (ClassNotFoundException e) {
+            throw new CrawlerInitializationException(e);
+        }
     }
 
     public void crawl(File file){
@@ -133,7 +79,8 @@ public class Crawler {
 
             }, requestDelayMs, TimeUnit.MILLISECONDS);
         }
-        threadPool.shutdown();;
+
+        threadPool.shutdown();
     }
 
     public static List<URL> readFile(File file){

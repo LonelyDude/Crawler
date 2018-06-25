@@ -6,11 +6,26 @@ import com.rg.analyser.SiteAnalyser;
 import org.kohsuke.github.GitHub;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Properties;
 
 public class GitHubAnalyser implements SiteAnalyser{
 
+    private static final String CONFIG = "github.properties";
+
     private GitHub gitHub;
+
+    public GitHubAnalyser(){
+        Properties properties = new Properties();
+        try {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG);
+            properties.load(inputStream);
+            gitHub = GitHub.connectUsingPassword(properties.getProperty("login"), properties.getProperty("password"));
+        } catch (IOException e) {
+            throw new IOConnectionException(e);
+        }
+    }
 
     public GitHubAnalyser(String login, String password){
         try {
@@ -21,7 +36,7 @@ public class GitHubAnalyser implements SiteAnalyser{
     }
 
     @Override
-    public GitHubProfile analyse(URL url) {       //format: https://github.com/login
+    public GitHubProfile analyse(URL url) { //format: https://github.com/login
         String path = url.getPath();
         String login = path.substring(1);
         GitHubProfile profile;

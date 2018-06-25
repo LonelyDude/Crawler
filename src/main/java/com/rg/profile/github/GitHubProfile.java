@@ -94,6 +94,6 @@ public class GitHubProfile implements Profile{
 
     @Override
     public String toString() {
-        return "login: " + login + "\nname: " + name + "\ncompany: " + company + "\nlocation: " + location + "\nlanguage: " + language + "\npopular repo: " + popularRepository + "\nstars: " + starsInPopularRepository;
+        return "login: " + login + "\nname: " + name + "\ncompany: " + company + "\nlocation: " + location + "\nlanguage: " + language + "\npopular repo: " + popularRepository + "\nstars: " + starsInPopularRepository + "\n";
     }
 }
