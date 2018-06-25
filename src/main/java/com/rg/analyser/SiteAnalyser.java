@@ -1,4 +1,4 @@
-package com.rg.site;
+package com.rg.analyser;
 
 import com.rg.profile.Profile;
 

@@ -1,0 +1,38 @@
+package com.rg.analyser.github;
+
+import com.rg.exception.IOConnectionException;
+import com.rg.profile.Profile;
+import com.rg.profile.github.GitHubProfile;
+import com.rg.analyser.SiteAnalyser;
+import org.kohsuke.github.GitHub;
+
+import java.io.IOException;
+import java.net.URL;
+
+public class GitHubAnalyser implements SiteAnalyser{
+
+    private GitHub gitHub;
+
+    public GitHubAnalyser(){
+        try {
+            gitHub = GitHub.connect();
+        } catch (IOException e) {
+            throw new IOConnectionException(e);
+        }
+    }
+
+    @Override
+    public Profile analyse(URL url) { //        https://github.com/login
+        String path = url.getPath();
+        String login = path.substring(1);
+        GitHubProfile profile;
+
+        try {
+            profile = new GitHubProfile(gitHub.getUser(login));
+        } catch (IOException e) {
+            throw new IOConnectionException(e);
+        }
+
+        return profile;
+    }
+}
