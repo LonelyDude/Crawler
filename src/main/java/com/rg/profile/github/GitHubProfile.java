@@ -45,7 +45,7 @@ public class GitHubProfile implements Profile{
                     }
                 }
 
-                if(repository.getSubscribersCount() > max){  //get popular repository and number of stars
+                if(repository.getSubscribersCount() >= max){  //get popular repository and number of stars
                     max = repository.getSubscribersCount();
                     popularRepository = repository.getName();
                     starsInPopularRepository = repository.getStargazersCount();
@@ -55,7 +55,7 @@ public class GitHubProfile implements Profile{
             max = 0;
             for (String lang : languagesMap.keySet()){ // get the most popular language
                 int numb = languagesMap.get(lang);
-                if(numb > max){
+                if(numb >= max){
                     max = numb;
                     language = lang;
                 }

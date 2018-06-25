@@ -1,6 +1,9 @@
 package com.rg;
 
+import com.rg.analyser.SiteAnalyser;
 import com.rg.exception.IOConnectionException;
+import com.rg.profile.Profile;
+import jdk.internal.org.objectweb.asm.tree.analysis.Analyzer;
 
 import java.io.*;
 import java.net.URL;
@@ -11,14 +14,14 @@ public class Crawler {
 
     private static final String MAX_PARALLEL_REQUESTS_ENV = "crawler.maxParallelRequests";
     private static final String REQUEST_DELAY_MS_ENV = "crawler.requestDelayMs";
-    private static final String CONFIG = "urls.txt";
+    private static final String CONFIG = "hosts.properties";
 
     private int maxParallelRequests = 1;
     private int requestDelayMs = 1000;
 
     private final ScheduledExecutorService threadPool;
 
-    private Set<URL> hosts;
+    private Properties hosts;
 
     private List<URL> urls;
 
@@ -35,7 +38,13 @@ public class Crawler {
 
         threadPool = Executors.newScheduledThreadPool(maxParallelRequests);
 
-        hosts = new HashSet<>(readFile(new File(CONFIG)));
+        try {
+            hosts = new Properties();
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG);
+            hosts.load(inputStream);
+        } catch (IOException e) {
+            throw new IOConnectionException(e);
+        }
     }
 
     public void crawl(File file){
@@ -46,9 +55,18 @@ public class Crawler {
     public void crawl(List<URL> urls){
         for (URL url : urls){
             threadPool.scheduleWithFixedDelay(()-> {
-                
-
-
+                String clazzName = hosts.getProperty(url.getHost());
+                try {
+                    Class clazz = Class.forName(clazzName);
+                    SiteAnalyser analyser = (SiteAnalyser) clazz.newInstance();
+                    Profile profile = analyser.analyse(url);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                }
             }, 0, requestDelayMs, TimeUnit.MILLISECONDS);
         }
     }
