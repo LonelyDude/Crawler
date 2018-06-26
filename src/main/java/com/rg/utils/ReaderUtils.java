@@ -12,8 +12,7 @@ public class ReaderUtils {
 
     public static Properties readProperties(String name){
         Properties properties = new Properties();
-        try {
-            InputStream inputStream = ReaderUtils.class.getClassLoader().getResourceAsStream(name);
+        try(InputStream inputStream = ReaderUtils.class.getClassLoader().getResourceAsStream(name)) {
             properties.load(inputStream);
         }
         catch (IOException e) {
@@ -46,8 +45,8 @@ public class ReaderUtils {
 
     public static List<URL> readURLFromFile(File file){
         List<URL> urls = new ArrayList<>();
-        try {
-            FileReader reader = new FileReader(file);
+        try(FileReader reader = new FileReader(file)) {
+
             BufferedReader bufferedReader = new BufferedReader(reader);
 
             String url;
@@ -65,8 +64,8 @@ public class ReaderUtils {
 
     public static List<URL> readURLFromFile(String name){
         List<URL> urls = new ArrayList<>();
-        try {
-            FileReader reader = new FileReader(new File(name));
+        try(FileReader reader = new FileReader(new File(name))) {
+
             BufferedReader bufferedReader = new BufferedReader(reader);
 
             String url;
