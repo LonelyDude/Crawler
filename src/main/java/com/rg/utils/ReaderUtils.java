@@ -3,8 +3,11 @@ package com.rg.utils;
 import com.rg.analyser.SiteAnalyser;
 import com.rg.exception.LoadingException;
 import com.rg.exception.IOConnectionException;
+import org.apache.http.HttpEntity;
+import sun.misc.IOUtils;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 
@@ -19,6 +22,24 @@ public class ReaderUtils {
             throw new IOConnectionException(e);
         }
         return properties;
+    }
+
+    public static String loadContent(HttpEntity entity, String encoding){
+        StringBuilder builder = new StringBuilder();
+
+        try(Reader reader = new InputStreamReader(entity.getContent(), encoding)){
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String tmp;
+
+            while ((tmp = bufferedReader.readLine()) != null){
+                builder.append(tmp);
+            }
+
+        } catch (IOException e) {
+            throw new IOConnectionException(e);
+        }
+        return builder.toString();
     }
 
     public static Map<String, SiteAnalyser> loadAnalyserFromProperties(Properties hostProperties){

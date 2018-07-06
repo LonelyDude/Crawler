@@ -33,6 +33,7 @@ public class GitHubAnalyserTest {
     public void analyseTest(){
         for (URL url : urls){
             GitHubProfile profile = analyser.analyse(url);
+            profile = analyser.analyse(url);
             if(profile == null){
                 Assert.fail();
             }

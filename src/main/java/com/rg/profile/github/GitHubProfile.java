@@ -1,12 +1,8 @@
 package com.rg.profile.github;
 
-import com.rg.exception.IOConnectionException;
 import com.rg.profile.Profile;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Map;
 
 public class GitHubProfile implements Profile{
 
@@ -20,53 +16,13 @@ public class GitHubProfile implements Profile{
 
     private String language;
 
-    private Map<String, GHRepository> repositories;
-
     private String popularRepository;
 
     private int starsInPopularRepository;
 
-    public GitHubProfile(GHUser user){
-        try {
-            login = user.getLogin();
-            name = user.getName();
-            company = user.getCompany();
-            location = user.getLocation();
-            repositories = user.getRepositories();
-
-            Map<String, Integer> languagesMap = new HashMap<>(); // language-number
-            int max = 0;
-            for (GHRepository repository : repositories.values()){
-                for(String lang : repository.listLanguages().keySet()){
-                    if(languagesMap.get(lang) == null){
-                        languagesMap.put(lang, 0);
-                    } else {
-                        languagesMap.put(lang, languagesMap.get(lang) + 1);
-                    }
-                }
-
-                if(repository.getWatchers() >= max){  //get popular repository and number of stars
-                    max = repository.getWatchers();
-                    popularRepository = repository.getName();
-                    starsInPopularRepository = repository.getStargazersCount();
-                }
-            }
-
-            max = 0;
-            for (String lang : languagesMap.keySet()){ // get the most popular language
-                int numb = languagesMap.get(lang);
-                if(numb >= max){
-                    max = numb;
-                    language = lang;
-                }
-            }
-
-        } catch (IOException e) {
-            throw new IOConnectionException(e);
-        }
+    public GitHubProfile(){
 
     }
-
 
     public String getLogin() {
         return login;
@@ -90,6 +46,34 @@ public class GitHubProfile implements Profile{
 
     public int getStarsInPopularRepository() {
         return starsInPopularRepository;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public void setPopularRepository(String popularRepository) {
+        this.popularRepository = popularRepository;
+    }
+
+    public void setStarsInPopularRepository(int starsInPopularRepository) {
+        this.starsInPopularRepository = starsInPopularRepository;
     }
 
     @Override
